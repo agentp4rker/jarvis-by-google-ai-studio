@@ -6,6 +6,7 @@ import psutil
 import pyautogui
 import time
 from typing import Dict, Any, Optional
+import pyttsx3
 
 try:
     import win32gui
@@ -13,7 +14,6 @@ try:
     import win32api
     import win32process
 except ImportError:
-    # Ignorowane na systemach innych niż Windows w celu zachowania możliwości analizy kodu
     pass
 
 def get_hwnds_for_pid(pid: int) -> list:
@@ -24,14 +24,16 @@ def get_hwnds_for_pid(pid: int) -> list:
             if found_pid == pid:
                 hwnds.append(hwnd)
         return True
-    win32gui.EnumWindows(callback, hwnds)
+    try:
+        win32gui.EnumWindows(callback, hwnds)
+    except Exception:
+        pass
     return hwnds
 
 def find_window_by_name(name: str) -> Optional[int]:
     name_lower = name.lower()
     target_hwnd = None
     
-    # 1. Szukanie po fragmencie tytułu okna
     def callback(hwnd, extra):
         nonlocal target_hwnd
         if target_hwnd is not None:
@@ -40,12 +42,15 @@ def find_window_by_name(name: str) -> Optional[int]:
         if win32gui.IsWindowVisible(hwnd) and name_lower in title:
             target_hwnd = hwnd
         return True
-    win32gui.EnumWindows(callback, None)
+    
+    try:
+        win32gui.EnumWindows(callback, None)
+    except Exception:
+        pass
     
     if target_hwnd:
         return target_hwnd
 
-    # 2. Szukanie po nazwie procesu (.exe)
     for proc in psutil.process_iter(['pid', 'name']):
         try:
             if proc.info['name'] and name_lower in proc.info['name'].lower():
@@ -66,11 +71,9 @@ def focus_app(application_name: str) -> Dict[str, Any]:
         _, pid = win32process.GetWindowThreadProcessId(hwnd)
         title = win32gui.GetWindowText(hwnd)
 
-        # Przywrócenie okna, jeśli jest zminimalizowane
         if win32gui.IsIconic(hwnd):
             win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
 
-        # Omijanie "Focus Stealing Prevention"
         current_thread_id = win32api.GetCurrentThreadId()
         foreground_hwnd = win32gui.GetForegroundWindow()
         window_thread_id = win32gui.GetWindowThreadProcessId(foreground_hwnd)[0] if foreground_hwnd else 0
@@ -96,7 +99,6 @@ def close_app(application_name: str) -> Dict[str, Any]:
             win32api.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
             return {"status": "closed", "method": "WM_CLOSE", "pid": pid}
         
-        # Fallback - siłowe zamknięcie przez psutil
         name_lower = application_name.lower()
         killed = []
         for proc in psutil.process_iter(['pid', 'name']):
@@ -185,3 +187,19 @@ def execute_shell_command(command: str) -> Dict[str, Any]:
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+def speak_on_pc(text: str) -> Dict[str, Any]:
+    \"\"\"Funkcja syntezy mowy J.A.R.V.I.S. na PC.\"\"\"
+    try:
+        engine = pyttsx3.init()
+        voices = engine.getProperty('voices')
+        # Próba wyboru polskiego głosu, jeśli dostępny
+        for voice in voices:
+            if 'polish' in voice.name.lower() or 'pl' in voice.languages:
+                engine.setProperty('voice', voice.id)
+                break
+        engine.say(text)
+        engine.runAndWait()
+        return {"status": "success", "spoken_text": text}
+    except Exception as e:
+        return {"status": "error", "message": f"Błąd TTS: {str(e)}"}

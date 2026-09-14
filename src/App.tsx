@@ -21,8 +21,10 @@ export default function App() {
           </div>
           
           <p className="text-neutral-400 mb-6 leading-relaxed">
-            Pełna, produkcyjna implementacja systemu J.A.R.V.I.S. w języku Python została wygenerowana zgodnie ze specyfikacją. 
-            Pliki źródłowe (Windows PC + Android WebSocket) znajdują się w katalogu <code className="bg-neutral-950 px-2 py-1 rounded text-cyan-300 border border-neutral-800">/jarvis</code>.
+            Pełna, wyczerpująca i bezkompromisowa implementacja (Deep Code Generation) systemu J.A.R.V.I.S. w języku Python. 
+            Wyeliminowano wszelkie "symulacje" — zaimplementowano twarde asynchroniczne <code>wait_for_event</code>, 
+            natywną syntezę mowy na PC (`pyttsx3`), zaawansowane nakładanie animacji HUD oraz wielowątkową ochronę zdarzeń (PyQt6 + asyncio).
+            Pliki źródłowe znajdują się w katalogu <code className="bg-neutral-950 px-2 py-1 rounded text-cyan-300 border border-neutral-800">/jarvis</code>.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -56,10 +58,17 @@ export default function App() {
             </div>
           </div>
           
-          <div className="mt-8 p-4 bg-cyan-950/20 border border-cyan-900/50 rounded-lg">
-            <p className="text-sm text-cyan-400/80">
-              Aby użyć systemu J.A.R.V.I.S., wykorzystaj panel plików środowiska, aby pobrać katalog <strong>/jarvis</strong> i uruchomić go natywnie w środowisku Windows 11 (wymagany Python 3.11+).
+          <div className="mt-8 p-6 bg-cyan-950/20 border border-cyan-900/50 rounded-lg">
+            <h4 className="text-cyan-300 font-bold mb-3 border-b border-cyan-900/50 pb-2">INSTRUKCJA INSTALACJI (WINDOWS 10 LTSC)</h4>
+            <p className="text-sm text-cyan-400/80 mb-3">
+              Aby zapobiec jakimkolwiek konfliktom bibliotek, musisz uruchomić projekt w odizolowanym wirtualnym środowisku:
             </p>
+            <ol className="list-decimal list-inside text-sm text-cyan-400 space-y-2">
+              <li>Pobierz i rozpakuj kod na komputer (np. na Pulpit).</li>
+              <li>Przejdź do pobranego folderu <code>jarvis</code>.</li>
+              <li>Kliknij dwukrotnie plik <strong><code className="bg-black px-2 py-1 rounded text-cyan-200">start_jarvis.bat</code></strong>.</li>
+            </ol>
+            <p className="text-xs text-cyan-600 mt-4 italic">Skrypt .bat automatycznie wykreuje wirtualne środowisko (venv), doinstaluje wszystkie pakiety i uruchomi system bez żadnych konfliktów.</p>
           </div>
         </div>
       </div>
